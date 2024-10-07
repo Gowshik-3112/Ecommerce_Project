@@ -32,10 +32,6 @@ public class CategoryServiceImpl implements CategoryService {
                             //findFirst().orElse(null);
                             findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
-        /*if(category == null) {
-            return "Category not found";
-        }*/
-
         categories.remove(category);
         return "Category with categoryId: " + categoryId + " deleted successfully";
     }
