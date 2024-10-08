@@ -32,32 +32,24 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public String deleteCategory(Long categoryId) {
+        Category category = categoryRepository.findById(categoryId).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
+
+        categoryRepository.delete(category);
+
         List<Category> categories = categoryRepository.findAll();
-
-        Category category = categories.stream().
-                            filter((x) -> x.getCategoryId().equals(categoryId)).
-                            //findFirst().orElse(null);
-                            findFirst().orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
-
-        //categories.remove(category);
         categoryRepository.delete(category);
         return "Category with categoryId: " + categoryId + " deleted successfully";
     }
 
     @Override
     public Category updateCategory(Category category, Long categoryId) {
-        List<Category> categories = categoryRepository.findAll();
 
-        Optional<Category> optionalCategory = categories.stream().
-                filter((x) -> x.getCategoryId().equals(categoryId)).findFirst();
+        Category updatedCategory = categoryRepository.findById(categoryId).
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found"));
 
-        if(optionalCategory.isPresent()) {
-            Category updatedCategory = optionalCategory.get();
-            updatedCategory.setCategoryName(category.getCategoryName());
-            Category savedCategory = categoryRepository.save(updatedCategory);
-            return savedCategory;
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found");
-        }
+        updatedCategory.setCategoryName(category.getCategoryName());
+        Category savedCategory = categoryRepository.save(updatedCategory);
+        return savedCategory;
     }
 }

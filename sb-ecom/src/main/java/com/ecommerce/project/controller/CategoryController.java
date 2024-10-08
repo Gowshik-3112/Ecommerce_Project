@@ -31,7 +31,7 @@ public class CategoryController {
         return new ResponseEntity<>("Category added successfully", HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/api/admin/categories/{categoryId}")
+    @DeleteMapping("/admin/categories/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
         try {
             String status = categoryService.deleteCategory(categoryId);
@@ -43,7 +43,7 @@ public class CategoryController {
         }
     }
 
-    @PutMapping("/api/public/categories/{categoryId}")
+    @PutMapping("/public/categories/{categoryId}")
     public ResponseEntity<String> updateCategory(@RequestBody Category category,
                                                  @PathVariable Long categoryId) {
         System.out.println("enters updateCategory");
