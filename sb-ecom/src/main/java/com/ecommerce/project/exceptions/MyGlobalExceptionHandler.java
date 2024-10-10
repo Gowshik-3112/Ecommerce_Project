@@ -32,4 +32,10 @@ public class MyGlobalExceptionHandler {
         return new ResponseEntity<String>(message, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(APIException.class)
+    public ResponseEntity<String> myAPIException(APIException e){
+        String message = e.getMessage();
+        return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+    }
+
 }
