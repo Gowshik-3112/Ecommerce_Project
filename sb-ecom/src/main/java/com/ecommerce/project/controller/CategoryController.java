@@ -48,5 +48,11 @@ public class CategoryController {
         return new ResponseEntity<>(updatedCategoryDTO, HttpStatus.OK);
     }
 
+    @GetMapping("/echo")
+    //public ResponseEntity<String> echoMessage(@RequestParam(name = "message" , required = false) String message) {
+    public ResponseEntity<String> echoMessage(@RequestParam(name = "message" , defaultValue = "good") String message) {
+
+        return new ResponseEntity<>("This is a echo message " + message, HttpStatus.OK);
+    }
 
 }
