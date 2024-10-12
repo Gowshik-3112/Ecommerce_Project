@@ -34,11 +34,11 @@ public class CategoryController {
     }
 
     @DeleteMapping("/admin/categories/{categoryId}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Long categoryId) {
-            String status = categoryService.deleteCategory(categoryId);
+    public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long categoryId) {
+            CategoryDTO categoryDTO = categoryService.deleteCategory(categoryId);
             //return new ResponseEntity<>(status, HttpStatus.OK);   this is the common way to send ResponseEntity to browser
             //return ResponseEntity.ok(status);
-            return ResponseEntity.status(HttpStatus.OK).body(status);
+            return ResponseEntity.status(HttpStatus.OK).body(categoryDTO);
     }
 
     @PutMapping("/public/categories/{categoryId}")
