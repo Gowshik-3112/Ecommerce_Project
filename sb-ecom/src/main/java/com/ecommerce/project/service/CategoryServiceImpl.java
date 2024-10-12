@@ -9,6 +9,9 @@ import com.ecommerce.project.repositories.CategoryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 
@@ -24,8 +27,11 @@ public class CategoryServiceImpl implements CategoryService {
     private ModelMapper modelMapper;
 
     @Override
-    public CategoryResponse getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
+    public CategoryResponse getAllCategories(Integer pageNumber, Integer pageSize) {
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize);
+        Page<Category> pageRetrieved = categoryRepository.findAll(pageDetails);
+
+        List<Category> categories = pageRetrieved.getContent();
         if (categories.isEmpty()) {
             throw new APIException("categories needs to be added");
         }
@@ -36,6 +42,11 @@ public class CategoryServiceImpl implements CategoryService {
 
         CategoryResponse categoryResponse = new CategoryResponse();
         categoryResponse.setContent(categoryDTOS);
+        categoryResponse.setTotalElements(pageRetrieved.getTotalElements());
+        categoryResponse.setPageNumber(pageRetrieved.getNumber());
+        categoryResponse.setPageSize(pageRetrieved.getSize());
+        categoryResponse.setTotalpages(pageRetrieved.getTotalPages());
+        categoryResponse.setLastPage(pageRetrieved.isLast());
         return categoryResponse;
     }
 
