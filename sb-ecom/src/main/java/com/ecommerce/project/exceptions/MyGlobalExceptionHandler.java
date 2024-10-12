@@ -47,7 +47,8 @@ public class MyGlobalExceptionHandler {
         Map<String, String> response = new HashMap<>();
         e.getConstraintViolations().forEach(violation -> {
             String field = violation.getPropertyPath().toString();
-            String message = violation.getMessage();
+            //String message = violation.getMessage();
+            String message = "invalid field: " + field;
             response.put(field, message);
         });
 
