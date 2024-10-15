@@ -38,6 +38,19 @@ public class ProductController {
     @GetMapping("/public/products/keyword/{keyWord}")
     public ResponseEntity<ProductResponse> getProductByKeyword(@PathVariable String keyWord) {
         ProductResponse productResponse = productService.getProductByKeyword(keyWord);
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return new ResponseEntity<>(productResponse, HttpStatus.FOUND);
+    }
+
+    @PutMapping("/admin/products/{productId}")
+    public ResponseEntity<ProductDTO> updateProduct(@RequestBody Product product,
+                                                    @PathVariable Long productId) {
+        ProductDTO productDTO = productService.updateProduct(product, productId);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/admin/deleteProducts/{productId}")
+    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId) {
+        ProductDTO productDTO = productService.deleteProduct(productId);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 }
