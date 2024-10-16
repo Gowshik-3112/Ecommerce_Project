@@ -46,14 +46,28 @@ public class ProductServiceImpl implements ProductService {
         Category category = categoryRepository.findById(categoryId).
                 orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
 
-        Product product = modelMapper.map(productDTO, Product.class);
-        product.setCategory(category);
-        product.setImage("default.png");
-        double specialPrice = product.getPrice() -
-                ((product.getDiscount() * 0.01) * product.getPrice());
-        product.setSpecialPrice(specialPrice);
-        Product savedProduct = productRepository.save(product);
-        return modelMapper.map(savedProduct, ProductDTO.class);
+        boolean isProductPresent = true;
+
+        List<Product> products = category.getProducts();
+        for (Product product : products) {
+            if(product.getProductName().equals(productDTO.getProductName())) {
+                isProductPresent = false;
+                break;
+            }
+        }
+
+        if(isProductPresent) {
+            Product product = modelMapper.map(productDTO, Product.class);
+            product.setCategory(category);
+            product.setImage("default.png");
+            double specialPrice = product.getPrice() -
+                    ((product.getDiscount() * 0.01) * product.getPrice());
+            product.setSpecialPrice(specialPrice);
+            Product savedProduct = productRepository.save(product);
+            return modelMapper.map(savedProduct, ProductDTO.class);
+        } else {
+            throw new APIException("Product not found");
+        }
     }
 
     @Override
@@ -78,6 +92,10 @@ public class ProductServiceImpl implements ProductService {
 
         List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);*/
         List<Product> products = productRepository.findByCategory_CategoryIdOrderByPriceAsc(categoryId);
+        if(products.isEmpty()) {
+            throw new APIException("No products found");
+        }
+
         List<ProductDTO> productDTOS = products.stream()
                 .map(product -> modelMapper.map(product, ProductDTO.class))
                 .toList();
