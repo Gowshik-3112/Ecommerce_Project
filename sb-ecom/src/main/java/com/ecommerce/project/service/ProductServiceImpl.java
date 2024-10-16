@@ -10,6 +10,7 @@ import com.ecommerce.project.repositories.CategoryRepository;
 import com.ecommerce.project.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +34,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private FileService fileService;
+
+    @Value("${project.image}")
+    private String path;
 
     @Override
     public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
@@ -126,8 +133,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId).
                 orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
 
-        String path = "images";
-        String fileName = uploadServer(path, image);
+        String fileName = fileService.uploadServer(path, image);
 
         // Updating the new file name to the product
         product.setImage(fileName);
@@ -135,30 +141,5 @@ public class ProductServiceImpl implements ProductService {
         Product updatedProduct = productRepository.save(product);
         // return DTO after mapping product to DTO
         return modelMapper.map(updatedProduct, ProductDTO.class);
-    }
-
-    private String uploadServer(String path, MultipartFile image) throws IOException {
-        String originalFileName = image.getOriginalFilename();
-
-
-        //Generate a unique filename
-        String randomID = UUID.randomUUID().toString();
-        // mat.jpg --> 1234 --> 1234.jpg
-        String fileName = randomID.concat(originalFileName.substring(originalFileName.lastIndexOf('.')));
-        String filePath = path + File.separator +  fileName;
-
-        File file = new File(path);
-        if (!file.exists()) {
-            if (file.mkdir()) {
-                System.out.println("Directory created: " + file.getAbsolutePath());
-            } else {
-                System.out.println("Failed to create directory: " + file.getAbsolutePath());
-            }
-        }
-
-
-        Files.copy(image.getInputStream(), Paths.get(filePath));
-
-        return fileName;
     }
 }
