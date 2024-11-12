@@ -1,10 +1,12 @@
 package com.ecommerce.project.service;
 
 import com.ecommerce.project.config.AppConstants;
+import com.ecommerce.project.exceptions.APIException;
 import com.ecommerce.project.model.Category;
 import com.ecommerce.project.payload.CategoryDTO;
 import com.ecommerce.project.payload.CategoryResponse;
 import com.ecommerce.project.repositories.CategoryRepository;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,9 +18,10 @@ import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceImplTest {
@@ -31,6 +34,20 @@ class CategoryServiceImplTest {
     @InjectMocks
     private CategoryServiceImpl categoryService;
 
+    static Category category1;
+    static Category category2;
+
+    @BeforeAll
+    public static void init() {
+        category1 = new Category();
+        category1.setCategoryId(1L);
+        category1.setCategoryName("Category 1");
+
+        category2 = new Category();
+        category2.setCategoryId(2L);
+        category2.setCategoryName("Category 2");
+    }
+
     @Test
     void getAllCategories() {
        Integer pageNumber = 0;
@@ -41,11 +58,9 @@ class CategoryServiceImplTest {
         Sort sort = Sort.by(sortBy).ascending();
 
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sort);
-        Category category1 = new Category();
         category1.setCategoryId(1L);
         category1.setCategoryName("Category 1");
 
-        Category category2 = new Category();
         category2.setCategoryId(2L);
         category2.setCategoryName("Category 2");
 
@@ -74,5 +89,45 @@ class CategoryServiceImplTest {
         assertEquals(2, categoryResponse.getTotalElements());
         assertTrue(categoryResponse.getContent().contains(categoryDTO1));
         assertTrue(categoryResponse.getContent().contains(categoryDTO2));
+    }
+
+    @Test
+    void categoryAlreadyExists() {
+        CategoryDTO categoryDTO1 = new CategoryDTO();
+        categoryDTO1.setCategoryId(1L);
+        categoryDTO1.setCategoryName("Category 1");
+
+        when(modelMapper.map(categoryDTO1, Category.class)).thenReturn(category1);
+        when(categoryRepository.findByCategoryName(categoryDTO1.getCategoryName())).thenReturn(category1);
+
+        APIException runtimeException = assertThrows(APIException.class, () -> {
+            categoryService.createCategory(categoryDTO1);
+        });
+
+        verify(categoryRepository, times(1)).findByCategoryName(categoryDTO1.getCategoryName());
+
+        System.out.println(" exception message " +  runtimeException.getMessage());
+
+        assertEquals("Category already exists with same name " + category1.getCategoryName(), runtimeException.getMessage());
+    }
+
+    @Test
+    void deleteExistingCategory() {
+        CategoryDTO categoryDTO1 = new CategoryDTO();
+        categoryDTO1.setCategoryId(1L);
+        categoryDTO1.setCategoryName("Category 1");
+
+
+        when(categoryRepository.findById(1L)).thenReturn(Optional.of(category1));
+        doNothing().when(categoryRepository).delete(category1); // void methods
+        when(modelMapper.map(category1, CategoryDTO.class)).thenReturn(categoryDTO1);
+        CategoryDTO category = categoryService.deleteCategory(1L);
+
+
+        verify(categoryRepository, times(1)).findById(1L);
+
+        assertNotNull(category);
+        assertEquals(categoryDTO1, category);
+
     }
 }
