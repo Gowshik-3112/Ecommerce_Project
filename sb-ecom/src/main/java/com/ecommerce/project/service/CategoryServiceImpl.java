@@ -57,6 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        String validName = checkProductName(categoryDTO.getCategoryName());
         Category category = modelMapper.map(categoryDTO, Category.class);
         Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
         if (savedCategory != null) {
@@ -87,5 +88,12 @@ public class CategoryServiceImpl implements CategoryService {
 
         updatedCategory = categoryRepository.save(createdCategory);
         return modelMapper.map(updatedCategory, CategoryDTO.class);
+    }
+
+    private String checkProductName(String productName) {
+        if(productName == null || productName.isEmpty()) {
+            throw new APIException("Product name cannot be empty");
+        }
+        return productName;
     }
 }

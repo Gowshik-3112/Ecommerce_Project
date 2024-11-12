@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,6 +130,33 @@ class CategoryServiceImplTest {
 
         assertNotNull(category);
         assertEquals(categoryDTO1, category);
+    }
 
+    @Test
+    void testCheckProductName() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException{
+        Method validCategoryName =  CategoryServiceImpl.class.getDeclaredMethod("checkProductName", String.class);
+
+        validCategoryName.setAccessible(true);
+        String validName = (String) validCategoryName.invoke(categoryService, "Category1");
+
+        assertEquals("Category1", validName);
+    }
+
+    @Test
+    void testCheckProductNameIsNotValid() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method validCategoryName =  CategoryServiceImpl.class.getDeclaredMethod("checkProductName", String.class);
+
+        validCategoryName.setAccessible(true);
+        // Invoke the method with an empty string (which should trigger an exception)
+        InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> {
+            validCategoryName.invoke(categoryService, "");
+        });
+
+        // Now assert that the cause of the InvocationTargetException is the expected APIException
+        assertTrue(exception.getCause() instanceof APIException, "Expected APIException to be thrown");
+
+        // Optionally, check the message of the exception to ensure it's correct
+        APIException cause = (APIException) exception.getCause();
+        assertEquals("Product name cannot be empty", cause.getMessage());
     }
 }
