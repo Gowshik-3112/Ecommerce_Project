@@ -57,6 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
+        System.out.println("createCategory is invoked");
         String validName = checkProductName(categoryDTO.getCategoryName());
         Category category = modelMapper.map(categoryDTO, Category.class);
         Category savedCategory = categoryRepository.findByCategoryName(category.getCategoryName());
